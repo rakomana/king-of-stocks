@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Stock;
+use App\Enum\ResponseCodes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
@@ -70,9 +71,46 @@ class StockController extends Controller
      * @param  \App\Models\Stock  $stock
      * @return \Illuminate\Http\Response
      */
-    public function show(Stock $stock)
+    public function show(Request $request)
     {
-        //
+        $stock = $this->stock->whereName($request->name)->get();
+
+        if ($request->has('fromDate') && $request->has('toDate')) {
+            $fromDate = Carbon::parse($request->fromDate);
+            $toDate = Carbon::parse($request->toDate);
+
+            if($toDate < $fromDate) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid date range',
+                    'status' => ResponseCodes::UNAUTHORIZED
+                ]);
+            }
+
+            $stock->whereBetween('created_at', [$fromDate, $toDate]);
+        }
+
+        if($request->has('order_by')) {
+            $stock->orderBy('created_at', $request->order_by);
+        } else {
+            $stock->orderBy('created_at', 'desc');
+        }
+
+        $filteredProducts = $stock;
+
+        if($filteredProducts->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Oops!, ticker does not exists',
+                'status' => ResponseCodes::UNAUTHORIZED
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $filteredProducts,
+            'status' => ResponseCodes::HTTP_OK
+        ]);
     }
 
     /**
