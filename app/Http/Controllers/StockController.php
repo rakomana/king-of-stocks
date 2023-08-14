@@ -166,7 +166,4 @@ class StockController extends Controller
 
     return json_encode($summary);
     }
-
-    //run unit test
-    //readme
 }

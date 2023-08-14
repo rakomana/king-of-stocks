@@ -50,6 +50,11 @@ composer run-script post-create-project-cmd
 
 2. Generate token by login to get stock prices for filtering
 see the api documentation below to generate the token
+
 https://api.postman.com/collections/10812189-5840a1df-4641-474d-a597-6a100b749dc9?access_key=PMAT-01H7SQSRDQ7TVVA7CWSMNAB72Q
 
-3 Run cron jobs
+3. Run cron jobs
+Add the following line to server's crontab configuration to schedule the task:
+0 22 * * * php /var/www/html/mylaravelapp/artisan email:send
+0 22 * * * php /var/www/html/mylaravelapp/artisan clean:up
+55 23 * * * php /var/www/html/mylaravelapp/artisan controller:store

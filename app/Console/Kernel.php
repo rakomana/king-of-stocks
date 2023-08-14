@@ -15,7 +15,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        $schedule->command('email:send')->dailyAt('22:00');
+        $schedule->command('clean:up')->dailyAt('02:00');
+        $schedule->call(function () {
+            app(StockController::class)->store(new Request());
+        })->dailyAt('23:55');
     }
 
     /**
