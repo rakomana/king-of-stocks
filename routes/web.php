@@ -13,5 +13,7 @@ use App\Http\Controllers\StockController;
 | contains the "web" middleware group. Now create something great!
 |
 */
-Route::get('/price', [StockController::class, 'store']);
+//to be used as mimic for cron jobs
+Route::get('/fetch-prices', [StockController::class, 'store']);
 Route::get('/clean-up', [StockController::class, 'cleanUp']);
+Route::get('/send-emails', [StockController::class, 'sendEmail']);

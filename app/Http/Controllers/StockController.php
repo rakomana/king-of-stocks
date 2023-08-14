@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Stock;
 use App\Enum\ResponseCodes;
@@ -120,14 +121,16 @@ class StockController extends Controller
     {
         $users = $this->user->all();
 
-        $notification = new NotifyUsersOnStockSummary();
+        $notification = new NotifyUsersOnStockSummary($this->generateSummary());
     
         Notification::send($users, $notification);
     
         Log::info('Emails sent');
     }
 
-    //cleanup of old prices older than 60 days
+    /**
+     * cleanup of old prices older than 60 days
+     */
     public function cleanUp()
     {
         $cutoffDate = Carbon::now()->subDays(60);
@@ -135,6 +138,33 @@ class StockController extends Controller
         $this->stock->where('created_at', '<', $cutoffDate)->delete();
 
         Log::info('Clean Up Done');
+    }
+
+    private function generateSummary()
+    {
+        //demonstrating the use of queries without the ORM
+        $summary = $this->db->select("SELECT
+                                            name,
+                                            new_price AS current_price,
+                                            ( (new_price - old_price) / old_price ) * 100 AS percentage_increase
+                                        FROM (
+                                            SELECT
+                                                name,
+                                                MAX(price) AS new_price,
+                                                (
+                                                    SELECT price
+                                                    FROM stocks AS s2
+                                                    WHERE s2.name = s1.name
+                                                    ORDER BY s2.id DESC
+                                                    LIMIT 1 OFFSET 1
+                                                ) AS old_price
+                                            FROM stocks AS s1
+                                            GROUP BY name
+                                            HAVING COUNT(*) >= 2
+                                        ) AS subquery;
+                                        ");
+
+    return json_encode($summary);
     }
 
     //run unit test

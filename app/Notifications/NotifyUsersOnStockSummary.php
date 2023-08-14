@@ -11,14 +11,16 @@ class NotifyUsersOnStockSummary extends Notification
 {
     use Queueable;
 
+    public $summary;
+
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct($summary)
     {
-        //
+        $this->summary = $summary;
     }
 
     /**
@@ -40,9 +42,16 @@ class NotifyUsersOnStockSummary extends Notification
      */
     public function toMail($notifiable)
     {
+        $data = "";
+
+        foreach(json_decode($this->summary) as $summary) {
+            $data .= "{$summary->name} price is {$summary->current_price} percentage increase of {$summary->percentage_increase}% ,";
+        }
+
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
+                    ->line('Hi '.$notifiable->name)
+                    ->line($data)
+                    ->action('Please check the summary below', url('/'))
                     ->line('Thank you for using our application!');
     }
 
