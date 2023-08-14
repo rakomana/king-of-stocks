@@ -58,3 +58,8 @@ Add the following line to server's crontab configuration to schedule the task:
 0 22 * * * php /var/www/html/mylaravelapp/artisan email:send
 0 22 * * * php /var/www/html/mylaravelapp/artisan clean:up
 55 23 * * * php /var/www/html/mylaravelapp/artisan controller:store
+
+4. Mimic the cron jobs on routes(web.php)
+http://127.0.0.1:8000/send-emails
+http://127.0.0.1:8000/clean-up
+http://127.0.0.1:8000/fetch-prices
